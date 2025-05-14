@@ -46,31 +46,33 @@
         <p>Выберите до 10 исполнителей, чьи треки звучали в этом туре.</p>
         <div class="grid" id="grid">
             <div class="cell" onclick="toggleSelect(this)">Би-2</div>
-            <div class="cell" onclick="toggleSelect(this)">Feduk</div>
-            <div class="cell" onclick="toggleSelect(this)">DMX</div>
-            <div class="cell" onclick="toggleSelect(this)">Jason Derulo</div>
-            <div class="cell" onclick="toggleSelect(this)">Елена Темникова</div>
-            <div class="cell" onclick="toggleSelect(this)">Дима Билан</div>
-            <div class="cell" onclick="toggleSelect(this)">Kylie Minogue</div>
+            <div class="cell" onclick="toggleSelect(this)">The Chemical Brothers</div>
+            <div class="cell" onclick="toggleSelect(this)">Slava Marlow</div>
             <div class="cell" onclick="toggleSelect(this)">Dua Lipa</div>
+            <div class="cell" onclick="toggleSelect(this)">Ольга Серябкина</div>
+            <div class="cell" onclick="toggleSelect(this)">Ice Cube</div>
+            <div class="cell" onclick="toggleSelect(this)">Дима Билан</div>
+            <div class="cell" onclick="toggleSelect(this)">Madonna</div>
+            <div class="cell" onclick="toggleSelect(this)">Feduk</div>
+            <div class="cell" onclick="toggleSelect(this)">Jason Derulo</div>
+            <div class="cell" onclick="toggleSelect(this)">Краски</div>
             <div class="cell" onclick="toggleSelect(this)">The Prodigy</div>
+            <div class="cell" onclick="toggleSelect(this)">Justin Bieber</div>
+            <div class="cell" onclick="toggleSelect(this)">Елена Темникова</div>
+            <div class="cell" onclick="toggleSelect(this)">Kylie Minogue</div>
+            <div class="cell" onclick="toggleSelect(this)">Агата Кристи</div>
+            <div class="cell" onclick="toggleSelect(this)">DMX</div>
+            <div class="cell" onclick="toggleSelect(this)">Алексей Воробьёв</div>
+            <div class="cell" onclick="toggleSelect(this)">Miley Cyrus</div>
             <div class="cell" onclick="toggleSelect(this)">Демо</div>
-            <div class="cell" onclick="toggleSelect(this)">Eminem</div>
-            <div class="cell" onclick="toggleSelect(this)">Zivert</div>
-            <div class="cell" onclick="toggleSelect(this)">T-Fest</div>
-            <div class="cell" onclick="toggleSelect(this)">Артик и Асти</div>
-            <div class="cell" onclick="toggleSelect(this)">Niletto</div>
-            <div class="cell" onclick="toggleSelect(this)">Imagine Dragons</div>
-            <div class="cell" onclick="toggleSelect(this)">LOBODA</div>
-            <div class="cell" onclick="toggleSelect(this)">Мот</div>
-            <div class="cell" onclick="toggleSelect(this)">50 Cent</div>
-            <div class="cell" onclick="toggleSelect(this)">Calvin Harris</div>
         </div>
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
         <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbz13ICpgITLjOf2XhWpML6GCQWrYyWzCvPjm_bOrsZKYuEG28dHi6uF6OcLxjArvPkh/exec" style="display:none;">
             <input type="hidden" name="name" id="nameInput">
             <input type="hidden" name="answers" id="answersInput">
+            <input type="hidden" name="correctAnswers" id="correctAnswersInput">
+            <input type="hidden" name="score" id="scoreInput">
             <input type="hidden" name="round" value="1">
         </form>
     </div>
@@ -78,6 +80,11 @@
     <script>
         let selected = [];
         const maxSelections = 10;
+        const correctAnswers = [
+            "Елена Темникова", "DMX", "Би-2", "Jason Derulo", 
+            "Демо", "Dua Lipa", "Дима Билан", "Kylie Minogue", 
+            "Feduk", "The Prodigy"
+        ];
 
         function toggleSelect(el) {
             const name = el.textContent.trim();
@@ -107,6 +114,20 @@
             document.getElementById("gameArea").style.display = "block";
         }
 
+        function calculateScore() {
+            let score = 0;
+            let correctSelected = [];
+            
+            for (const answer of selected) {
+                if (correctAnswers.includes(answer)) {
+                    score++;
+                    correctSelected.push(answer);
+                }
+            }
+            
+            return {score, correctSelected};
+        }
+
         function submitForm() {
             if (selected.length === 0) {
                 alert("Выберите хотя бы одного исполнителя.");
@@ -114,9 +135,12 @@
             }
 
             const name = document.getElementById("playerName").value.trim();
-            const answers = selected.join(", ");
+            const {score, correctSelected} = calculateScore();
+            
             document.getElementById("nameInput").value = name;
-            document.getElementById("answersInput").value = answers;
+            document.getElementById("answersInput").value = selected.join(", ");
+            document.getElementById("correctAnswersInput").value = correctSelected.join(", ");
+            document.getElementById("scoreInput").value = score;
 
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
