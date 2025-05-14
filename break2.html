@@ -9,19 +9,71 @@
             text-align: center;
             background-color: #f7f7f7;
             padding: 50px;
+            margin: 0;
         }
         .message {
             color: #1e88e5;
             font-size: 24px;
-            margin: 50px 0;
+            margin: 30px 0 20px;
+        }
+        .submessage {
+            color: #555;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        .blitz-btn {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(30, 136, 229, 0.2);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .blitz-btn:hover {
+            background-color: #1565c0;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(30, 136, 229, 0.3);
+        }
+        .blitz-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(30, 136, 229, 0.2);
+        }
+        .error {
+            color: #d32f2f;
+            margin-top: 20px;
+            display: none;
+            font-size: 16px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
-    <h1>Перерыв перед БЛИЦЕМ:)</h1>
-    <p>Спасибо за участие! Сейчас будут объявлены промежуточные результаты.</p>
-    <button onclick="startRound5()">Перейти к БЛИЦУ</button>
-    <p id="errorMsg" class="error">Ошибка системы. Пожалуйста, сообщите организаторам.</p>
+    <div class="container">
+        <h1>Перерыв перед БЛИЦЕМ :)</h1>
+        <div class="message">Спасибо за участие!</div>
+        <p class="submessage">Сейчас будут объявлены промежуточные результаты</p>
+        
+        <button class="blitz-btn" onclick="startRound5()">
+            Перейти к БЛИЦУ
+        </button>
+        
+        <p id="errorMsg" class="error">
+            Ошибка системы. Пожалуйста, сообщите организаторам.
+        </p>
+    </div>
 
     <script>
         function startRound5() {
