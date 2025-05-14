@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Музыкальное Лото - Тур 4</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background-color: #f7f7f7; 
+            margin: 0;
+            padding: 20px;
+        }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            justify-content: center; 
+            margin: 30px auto; 
+            max-width: 900px;
+        }
+        .cell {
+            background-color: #fff;
+            border: 2px solid #ccc;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            user-select: none;
+            border-radius: 5px;
+        }
+        .cell.selected { 
+            background-color: #b3e5fc; 
+            border-color: #0288d1; 
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #3e8e41;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #gameArea { 
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        #loading { 
+            display: none; 
+            margin: 20px 0;
+            color: #666;
+        }
+        .player-name {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+        .instructions {
+            margin-bottom: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <h1>Музыкальное Лото - Тур 4</h1>
+        <div class="player-name">Игрок: <span id="displayName"></span></div>
+        <p class="instructions">Выберите до 10 исполнителей, чьи треки звучали в этом туре.</p>
+        
+        <div class="grid">
+            <div class="cell" onclick="toggleSelect(this)">МакSим</div>
+            <div class="cell" onclick="toggleSelect(this)">The Rasmus</div>
+            <div class="cell" onclick="toggleSelect(this)">James Blunt</div>
+            <div class="cell" onclick="toggleSelect(this)">Алсу</div>
+            <div class="cell" onclick="toggleSelect(this)">Billy Idol</div>
+            <div class="cell" onclick="toggleSelect(this)">Maroon 5</div>
+            <div class="cell" onclick="toggleSelect(this)">Ed Sheeran</div>
+            <div class="cell" onclick="toggleSelect(this)">Градусы</div>
+            <div class="cell" onclick="toggleSelect(this)">Lenny Kravitz</div>
+            <div class="cell" onclick="toggleSelect(this)">Валерий Меладзе</div>
+            <div class="cell" onclick="toggleSelect(this)">Григорий Лепс</div>
+            <div class="cell" onclick="toggleSelect(this)">Black Eyed Peas</div>
+            <div class="cell" onclick="toggleSelect(this)">Eagle-Eye Cherry</div>
+            <div class="cell" onclick="toggleSelect(this)">Валерия</div>
+            <div class="cell" onclick="toggleSelect(this)">Placebo</div>
+            <div class="cell" onclick="toggleSelect(this)">Комната культуры</div>
+            <div class="cell" onclick="toggleSelect(this)">The Offspring</div>
+            <div class="cell" onclick="toggleSelect(this)">Ани Лорак</div>
+            <div class="cell" onclick="toggleSelect(this)">Сплин</div>
+            <div class="cell" onclick="toggleSelect(this)">Linkin Park</div>
+            <div class="cell" onclick="toggleSelect(this)">Red Hot Chili Peppers</div>
+            <div class="cell" onclick="toggleSelect(this)">Леонид Агутин</div>
+            <div class="cell" onclick="toggleSelect(this)">Muse</div>
+            <div class="cell" onclick="toggleSelect(this)">Daniel Powter</div>
+            <div class="cell" onclick="toggleSelect(this)">Юлианна Караулова</div>
+            <div class="cell" onclick="toggleSelect(this)">Quest Pistols</div>
+            <div class="cell" onclick="toggleSelect(this)">Lumen</div>
+            <div class="cell" onclick="toggleSelect(this)">Жасмин</div>
+            <div class="cell" onclick="toggleSelect(this)">LMFAO</div>
+            <div class="cell" onclick="toggleSelect(this)">Порнофильмы</div>
+        </div>
+        
+        <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
+        <div id="loading">Отправка данных...</div>
+        
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbz13ICpgITLjOf2XhWpML6GCQWrYyWzCvPjm_bOrsZKYuEG28dHi6uF6OcLxjArvPkh/exec" style="display:none;">
+            <input type="hidden" name="name" id="nameInput">
+            <input type="hidden" name="answers" id="answersInput">
+            <input type="hidden" name="correctAnswers" id="correctAnswersInput">
+            <input type="hidden" name="score" id="scoreInput">
+            <input type="hidden" name="round" value="4">
+        </form>
+    </div>
+
+    <script>
+        let selected = [];
+        const maxSelections = 10;
+        const correctAnswers = [
+            "Black Eyed Peas", "Порнофильмы", "Lenny Kravitz", "МакSим", 
+            "Red Hot Chili Peppers", "Валерий Меладзе", "Linkin Park", 
+            "Ани Лорак", "James Blunt", "Quest Pistols"
+        ];
+
+        // Проверяем сохраненное имя при загрузке
+        window.onload = function() {
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                document.getElementById("displayName").textContent = savedName;
+                document.getElementById("nameInput").value = savedName;
+            } else {
+                alert("Пожалуйста, сначала пройдите предыдущие туры.");
+                window.location.href = "index.html";
+            }
+        };
+
+        function toggleSelect(el) {
+            const name = el.textContent.trim();
+            const index = selected.indexOf(name);
+
+            if (index > -1) {
+                selected.splice(index, 1);
+                el.classList.remove("selected");
+            } else {
+                if (selected.length < maxSelections) {
+                    selected.push(name);
+                    el.classList.add("selected");
+                } else {
+                    alert("Можно выбрать не более 10 исполнителей.");
+                }
+            }
+        }
+
+        function calculateScore() {
+            let score = 0;
+            let correctSelected = [];
+            
+            for (const answer of selected) {
+                if (correctAnswers.includes(answer)) {
+                    score++;
+                    correctSelected.push(answer);
+                }
+            }
+            
+            return {score, correctSelected};
+        }
+
+        function submitForm() {
+            if (selected.length === 0) {
+                alert("Выберите хотя бы одного исполнителя.");
+                return;
+            }
+
+            const name = document.getElementById("nameInput").value;
+            const {score, correctSelected} = calculateScore();
+            
+            document.getElementById("answersInput").value = selected.join(", ");
+            document.getElementById("correctAnswersInput").value = correctSelected.join(", ");
+            document.getElementById("scoreInput").value = score;
+
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("loading").style.display = "block";
+
+            fetch(document.getElementById("hiddenForm").action, {
+                method: 'POST',
+                body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
+                redirect: 'follow'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = "break.html";
+                } else {
+                    throw new Error('Ошибка сети');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
+                document.getElementById("submitBtn").disabled = false;
+                document.getElementById("loading").style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>
