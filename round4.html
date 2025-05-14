@@ -13,11 +13,11 @@
         }
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
+            grid-template-columns: repeat(5, 1fr); 
             gap: 10px; 
             justify-content: center; 
             margin: 30px auto; 
-            max-width: 900px;
+            max-width: 1000px;
         }
         .cell {
             background-color: #fff;
@@ -27,6 +27,11 @@
             transition: 0.3s;
             user-select: none;
             border-radius: 5px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
         .cell.selected { 
             background-color: #b3e5fc; 
@@ -51,7 +56,7 @@
             cursor: not-allowed;
         }
         #gameArea { 
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: white;
             padding: 20px;
@@ -73,6 +78,12 @@
             margin-bottom: 20px;
             color: #555;
         }
+        .counter {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -80,6 +91,7 @@
         <h1>Музыкальное Лото - Тур 4</h1>
         <div class="player-name">Игрок: <span id="displayName"></span></div>
         <p class="instructions">Выберите до 10 исполнителей, чьи треки звучали в этом туре.</p>
+        <div class="counter">Выбрано: <span id="selectedCount">0</span>/10</div>
         
         <div class="grid">
             <div class="cell" onclick="toggleSelect(this)">МакSим</div>
@@ -87,26 +99,31 @@
             <div class="cell" onclick="toggleSelect(this)">James Blunt</div>
             <div class="cell" onclick="toggleSelect(this)">Алсу</div>
             <div class="cell" onclick="toggleSelect(this)">Billy Idol</div>
+            
             <div class="cell" onclick="toggleSelect(this)">Maroon 5</div>
             <div class="cell" onclick="toggleSelect(this)">Ed Sheeran</div>
             <div class="cell" onclick="toggleSelect(this)">Градусы</div>
             <div class="cell" onclick="toggleSelect(this)">Lenny Kravitz</div>
             <div class="cell" onclick="toggleSelect(this)">Валерий Меладзе</div>
+            
             <div class="cell" onclick="toggleSelect(this)">Григорий Лепс</div>
             <div class="cell" onclick="toggleSelect(this)">Black Eyed Peas</div>
             <div class="cell" onclick="toggleSelect(this)">Eagle-Eye Cherry</div>
             <div class="cell" onclick="toggleSelect(this)">Валерия</div>
             <div class="cell" onclick="toggleSelect(this)">Placebo</div>
+            
             <div class="cell" onclick="toggleSelect(this)">Комната культуры</div>
             <div class="cell" onclick="toggleSelect(this)">The Offspring</div>
             <div class="cell" onclick="toggleSelect(this)">Ани Лорак</div>
             <div class="cell" onclick="toggleSelect(this)">Сплин</div>
             <div class="cell" onclick="toggleSelect(this)">Linkin Park</div>
+            
             <div class="cell" onclick="toggleSelect(this)">Red Hot Chili Peppers</div>
             <div class="cell" onclick="toggleSelect(this)">Леонид Агутин</div>
             <div class="cell" onclick="toggleSelect(this)">Muse</div>
             <div class="cell" onclick="toggleSelect(this)">Daniel Powter</div>
             <div class="cell" onclick="toggleSelect(this)">Юлианна Караулова</div>
+            
             <div class="cell" onclick="toggleSelect(this)">Quest Pistols</div>
             <div class="cell" onclick="toggleSelect(this)">Lumen</div>
             <div class="cell" onclick="toggleSelect(this)">Жасмин</div>
@@ -160,8 +177,11 @@
                     el.classList.add("selected");
                 } else {
                     alert("Можно выбрать не более 10 исполнителей.");
+                    return;
                 }
             }
+            // Обновляем счетчик
+            document.getElementById("selectedCount").textContent = selected.length;
         }
 
         function calculateScore() {
@@ -201,7 +221,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = "break2.html";
+                    window.location.href = "break.html";
                 } else {
                     throw new Error('Ошибка сети');
                 }
@@ -215,4 +235,4 @@
         }
     </script>
 </body>
-</html>
+</html>   
