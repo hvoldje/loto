@@ -10,10 +10,37 @@
             background-color: #f0f8ff;
         }
         h1 { color: #2e7d32; }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Перерыв :)</h1>
     <p>Спасибо за участие! Результаты будут объявлены позже.</p>
+    <button onclick="startRound3()">Перейти к туру 3</button>
+
+    <script>
+        function startRound3() {
+            // Проверяем, есть ли сохраненное имя
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                window.location.href = "round3.html";
+            } else {
+                alert("Пожалуйста, сначала пройдите первый тур.");
+                window.location.href = "index.html";
+            }
+        }
+    </script>
 </body>
 </html>
