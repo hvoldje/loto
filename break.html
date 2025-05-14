@@ -20,8 +20,10 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        button:hover {
-            background-color: #45a049;
+        .error {
+            color: #d32f2f;
+            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
@@ -29,18 +31,33 @@
     <h1>Перерыв :)</h1>
     <p>Спасибо за участие! Результаты будут объявлены позже.</p>
     <button onclick="startRound3()">Перейти к туру 3</button>
+    <p id="errorMsg" class="error">Ошибка системы. Пожалуйста, сообщите организаторам.</p>
 
     <script>
         function startRound3() {
-            // Проверяем, есть ли сохраненное имя
-            const savedName = localStorage.getItem('playerName');
-            if (savedName) {
+            // Проверяем имя в двух местах на случай проблем с localStorage
+            const savedName = localStorage.getItem('playerName') || 
+                             sessionStorage.getItem('playerNameBackup');
+            
+            if (savedName && savedName.trim().length > 0) {
+                // Дублируем в sessionStorage для надежности
+                sessionStorage.setItem('playerNameBackup', savedName);
                 window.location.href = "round3.html";
             } else {
-                alert("Пожалуйста, сначала пройдите первый тур.");
-                window.location.href = "index.html";
+                document.getElementById("errorMsg").style.display = "block";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 3000);
             }
         }
+        
+        // Проверяем при загрузке страницы
+        window.onload = function() {
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                sessionStorage.setItem('playerNameBackup', savedName);
+            }
+        };
     </script>
 </body>
 </html>
