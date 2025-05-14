@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Музыкальное Лото - Тур 1</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f7f7f7; }
+        .grid { display: grid; grid-template-columns: repeat(4, 200px); gap: 10px; justify-content: center; margin: 30px auto; max-width: 900px; }
+        .cell {
+            background-color: #fff;
+            border: 2px solid #ccc;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            user-select: none;
+        }
+        .cell.selected { background-color: #b3e5fc; border-color: #0288d1; }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #gameArea { display: none; }
+        #loading { display: none; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Музыкальное Лото - Тур 1</h1>
+    <div id="nameInputArea">
+        <p>Введите ваше имя или ник:</p>
+        <input type="text" id="playerName" placeholder="Ваше имя" required />
+        <br><br>
+        <button onclick="startGame()">Начать игру</button>
+    </div>
+
+    <div id="gameArea">
+        <p>Выберите до 10 исполнителей, чьи треки звучали в этом туре.</p>
+        <div class="grid" id="grid">
+            <div class="cell" onclick="toggleSelect(this)">Би-2</div>
+            <div class="cell" onclick="toggleSelect(this)">Feduk</div>
+            <div class="cell" onclick="toggleSelect(this)">DMX</div>
+            <div class="cell" onclick="toggleSelect(this)">Jason Derulo</div>
+            <div class="cell" onclick="toggleSelect(this)">Елена Темникова</div>
+            <div class="cell" onclick="toggleSelect(this)">Дима Билан</div>
+            <div class="cell" onclick="toggleSelect(this)">Kylie Minogue</div>
+            <div class="cell" onclick="toggleSelect(this)">Dua Lipa</div>
+            <div class="cell" onclick="toggleSelect(this)">The Prodigy</div>
+            <div class="cell" onclick="toggleSelect(this)">Демо</div>
+            <div class="cell" onclick="toggleSelect(this)">Eminem</div>
+            <div class="cell" onclick="toggleSelect(this)">Zivert</div>
+            <div class="cell" onclick="toggleSelect(this)">T-Fest</div>
+            <div class="cell" onclick="toggleSelect(this)">Артик и Асти</div>
+            <div class="cell" onclick="toggleSelect(this)">Niletto</div>
+            <div class="cell" onclick="toggleSelect(this)">Imagine Dragons</div>
+            <div class="cell" onclick="toggleSelect(this)">LOBODA</div>
+            <div class="cell" onclick="toggleSelect(this)">Мот</div>
+            <div class="cell" onclick="toggleSelect(this)">50 Cent</div>
+            <div class="cell" onclick="toggleSelect(this)">Calvin Harris</div>
+        </div>
+        <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
+        <div id="loading">Отправка данных...</div>
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbz13ICpgITLjOf2XhWpML6GCQWrYyWzCvPjm_bOrsZKYuEG28dHi6uF6OcLxjArvPkh/exec" style="display:none;">
+            <input type="hidden" name="name" id="nameInput">
+            <input type="hidden" name="answers" id="answersInput">
+            <input type="hidden" name="round" value="1">
+        </form>
+    </div>
+
+    <script>
+        let selected = [];
+        const maxSelections = 10;
+
+        function toggleSelect(el) {
+            const name = el.textContent.trim();
+            const index = selected.indexOf(name);
+
+            if (index > -1) {
+                selected.splice(index, 1);
+                el.classList.remove("selected");
+            } else {
+                if (selected.length < maxSelections) {
+                    selected.push(name);
+                    el.classList.add("selected");
+                } else {
+                    alert("Можно выбрать не более 10 исполнителей.");
+                }
+            }
+        }
+
+        function startGame() {
+            const name = document.getElementById("playerName").value.trim();
+            if (!name) {
+                alert("Пожалуйста, введите имя.");
+                return;
+            }
+
+            document.getElementById("nameInputArea").style.display = "none";
+            document.getElementById("gameArea").style.display = "block";
+        }
+
+        function submitForm() {
+            if (selected.length === 0) {
+                alert("Выберите хотя бы одного исполнителя.");
+                return;
+            }
+
+            const name = document.getElementById("playerName").value.trim();
+            const answers = selected.join(", ");
+            document.getElementById("nameInput").value = name;
+            document.getElementById("answersInput").value = answers;
+
+            document.getElementById("submitBtn").disabled = true;
+            document.getElementById("loading").style.display = "block";
+
+            // Сохраняем имя для второго тура
+            localStorage.setItem('playerName', name);
+            
+            // Отправляем данные через Fetch API
+            fetch(document.getElementById("hiddenForm").action, {
+                method: 'POST',
+                body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
+                redirect: 'follow'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Перенаправляем на второй тур
+                    window.location.href = "round2.html";
+                } else {
+                    throw new Error('Ошибка сети');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
+                document.getElementById("submitBtn").disabled = false;
+                document.getElementById("loading").style.display = "none";
+            });
+        }
+    </script>
+</body>
+</html>
