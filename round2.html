@@ -151,7 +151,6 @@
             5: ["Tiёsto", "Calvin Harris", "FILV"]
         };
 
-        // Проверяем сохраненное имя при загрузке
         window.onload = function() {
             const savedName = localStorage.getItem('playerName');
             if (savedName) {
@@ -181,7 +180,6 @@
                 }
             }
             
-            // Обновляем общий массив выбранных ответов
             selected = [];
             for (let i = 1; i <= 5; i++) {
                 selected = selected.concat(blockSelections[i]);
@@ -191,30 +189,26 @@
         function calculateScore() {
             let score = 0;
             let bonus = 0;
+            let correctSelected = [];
             
             for (let blockNum = 1; blockNum <= 5; blockNum++) {
                 const blockAnswers = blockSelections[blockNum];
                 const correct = correctAnswers[blockNum];
                 let correctCount = 0;
-                let wrongCount = 0;
                 
                 // Считаем правильные ответы
                 for (const answer of blockAnswers) {
                     if (correct.includes(answer)) {
                         correctCount++;
-                    } else {
-                        wrongCount++;
+                        correctSelected.push(answer);
                     }
                 }
                 
                 // Добавляем баллы за правильные ответы
                 score += correctCount;
                 
-                // Вычитаем баллы за лишние ответы
-                score -= wrongCount;
-                
                 // Проверяем на бонус за полный блок
-                if (wrongCount === 0 && correctCount === 3) {
+                if (correctCount === 3 && blockAnswers.length === 3) {
                     bonus++;
                 }
             }
@@ -222,7 +216,10 @@
             // Добавляем бонусные баллы
             score += bonus;
             
-            return {total: score, bonus: bonus};
+            // Гарантируем, что баллы не будут отрицательными
+            score = Math.max(0, score);
+            
+            return {total: score, bonus: bonus, correctSelected};
         }
 
         function submitForm() {
@@ -232,12 +229,18 @@
             }
 
             const name = document.getElementById("playerName").value.trim();
-            const answers = selected.join(", ");
-            const {total, bonus} = calculateScore();
+            const {total, bonus, correctSelected} = calculateScore();
             
             document.getElementById("nameInput").value = name;
-            document.getElementById("answersInput").value = answers;
+            document.getElementById("answersInput").value = selected.join(", ");
             document.getElementById("scoreInput").value = total;
+
+            // Добавляем скрытые поля для правильных ответов
+            const correctInput = document.createElement('input');
+            correctInput.type = 'hidden';
+            correctInput.name = 'correctAnswers';
+            correctInput.value = correctSelected.join(", ");
+            document.getElementById("hiddenForm").appendChild(correctInput);
 
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
@@ -249,7 +252,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.href = "break.html"; // Перенаправление
+                    window.location.href = "break.html";
                     localStorage.removeItem('playerName');
                 } else {
                     throw new Error('Ошибка сети');
