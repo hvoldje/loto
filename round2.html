@@ -253,7 +253,6 @@
             .then(response => {
                 if (response.ok) {
                     window.location.href = "break.html";
-                    localStorage.removeItem('playerName');
                 } else {
                     throw new Error('Ошибка сети');
                 }
