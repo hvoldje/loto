@@ -106,7 +106,7 @@
         <div class="player-name">Игрок: <span id="displayName"></span></div>
         <p class="instructions">Выберите по 4 верных исполнителя в каждом блоке. Можно сделать ставку на весь блок (синяя галочка).</p>
         
-        <!-- Блок 1 -->
+        <!-- Блоки с вариантами ответов -->
         <div class="block">
             <div class="block-title">ЗАРУБЕЖНЫЙ РОК</div>
             <div class="grid">
@@ -208,19 +208,10 @@
         
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
-        
-        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
-            <input type="hidden" name="name" id="nameInput">
-            <input type="hidden" name="answers" id="answersInput">
-            <input type="hidden" name="correctAnswers" id="correctAnswersInput">
-            <input type="hidden" name="score" id="scoreInput">
-            <input type="hidden" name="round" value="5">
-            <input type="hidden" name="bets" id="betsInput">
-            <input type="hidden" name="details" id="detailsInput">
-        </form>
     </div>
 
     <script>
+        // Правильные ответы для каждого блока
         const correctAnswers = {
             1: ["The Killers", "The Rolling Stones", "Jefferson Airplane", "Skillet"],
             2: ["Егор Крид", "Gorillaz", "Coldplay", "Kate Bush"],
@@ -232,18 +223,18 @@
         let selected = {1: [], 2: [], 3: [], 4: [], 5: []};
         let bets = {1: false, 2: false, 3: false, 4: false, 5: false};
 
-        // Проверяем сохраненное имя при загрузке
+        // Загрузка имени игрока
         window.onload = function() {
             const savedName = localStorage.getItem('playerName');
             if (savedName) {
                 document.getElementById("displayName").textContent = savedName;
-                document.getElementById("nameInput").value = savedName;
             } else {
                 alert("Пожалуйста, сначала пройдите предыдущие туры.");
                 window.location.href = "index.html";
             }
         };
 
+        // Выбор исполнителя
         function toggleSelect(el, blockNum) {
             const name = el.textContent.trim();
             const blockArray = selected[blockNum];
@@ -262,12 +253,12 @@
             }
         }
 
+        // Ставка на блок
         function toggleBet(blockNum) {
             const betBtn = document.querySelectorAll('.bet-btn')[blockNum-1];
             bets[blockNum] = !bets[blockNum];
             betBtn.classList.toggle("active", bets[blockNum]);
             
-            // Проверяем, что в блоке с ставкой ровно 4 ответа
             if (bets[blockNum] && selected[blockNum].length !== 4) {
                 alert("Для ставки на блок нужно выбрать ровно 4 исполнителя!");
                 bets[blockNum] = false;
@@ -275,6 +266,7 @@
             }
         }
 
+        // Расчет баллов
         function calculateScore() {
             let score = 0;
             let correctSelected = [];
@@ -285,121 +277,72 @@
                 const correct = correctAnswers[blockNum];
                 const isBet = bets[blockNum];
                 let correctCount = 0;
-                let blockCorrect = [];
                 
                 for (const answer of blockAnswers) {
                     if (correct.includes(answer)) {
                         correctCount++;
-                        blockCorrect.push(answer);
                         correctSelected.push(answer);
                     }
                 }
                 
-                // Подсчет баллов для блока
-                let blockScore = 0;
-                if (isBet) {
-                    if (blockAnswers.length < 4) {
-                        blockScore = -2 * (4 - blockAnswers.length); // Штраф за недостающие ответы
-                    } else {
-                        blockScore = correctCount * 2 - (4 - correctCount) * 2;
-                    }
-                } else {
-                    blockScore = correctCount;
-                }
+                let blockScore = isBet ? 
+                    (correctCount * 2 - (4 - correctCount) * 2) : 
+                    correctCount;
                 
-                score += blockScore;
-                
-                // Формируем детализацию
+                score += Math.max(0, blockScore);
                 details.push(`Блок ${blockNum}: ${correctCount}/4 ${isBet ? '(ставка)' : ''}`);
             }
             
             return {
-                score: Math.max(0, score), // Баллы не могут быть отрицательными
+                score: score,
                 correctSelected: correctSelected,
                 details: details.join('; ')
             };
         }
 
+        // Отправка данных
         function submitForm() {
-  // Проверка ставок
-  for (let blockNum = 1; blockNum <= 5; blockNum++) {
-    if (bets[blockNum] && selected[blockNum].length !== 4) {
-      alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
-      return;
-    }
-  }
-
-  // Подготовка данных
-  const { score, correctSelected, details } = calculateScore();
-  const formData = {
-    name: localStorage.getItem('playerName'),
-    answers: Object.values(selected).map(arr => arr.join('|')).join(';'),
-    correctAnswers: correctSelected.join(', '),
-    score: score,
-    round: '5',
-    details: details,
-    bets: JSON.stringify(bets)
-  };
-
-  // Отправка
-  document.getElementById("submitBtn").disabled = true;
-  document.getElementById("loading").style.display = "block";
-
-  fetch('https://script.google.com/macros/s/ВАШ_ID_СКРИПТА/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      window.location.href = "final.html";
-    } else {
-      throw new Error(data.message || 'Ошибка сервера');
-    }
-  })
-  .catch(error => {
-    console.error('Ошибка:', error);
-    alert("Ошибка при отправке: " + error.message);
-    document.getElementById("submitBtn").disabled = false;
-    document.getElementById("loading").style.display = "none";
-  });
-}
-            
-            if (!isValid) return;
-
-            const name = document.getElementById("nameInput").value;
-            const {score, correctSelected, details} = calculateScore();
-            
-            // Формируем данные для отправки
-            const allAnswers = [];
-            for (let i = 1; i <= 5; i++) {
-                allAnswers.push(selected[i].join('|'));
+            // Проверка ставок
+            for (let blockNum = 1; blockNum <= 5; blockNum++) {
+                if (bets[blockNum] && selected[blockNum].length !== 4) {
+                    alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
+                    return;
+                }
             }
-            
-            document.getElementById("answersInput").value = allAnswers.join(';');
-            document.getElementById("correctAnswersInput").value = correctSelected.join(', ');
-            document.getElementById("scoreInput").value = score;
-            document.getElementById("betsInput").value = JSON.stringify(bets);
 
+            const {score, correctSelected, details} = calculateScore();
+            const playerName = localStorage.getItem('playerName');
+            
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
 
-            fetch(document.getElementById("hiddenForm").action, {
+            // Отправка данных на сервер
+            fetch('https://script.google.com/macros/s/ВАШ_ID_СКРИПТА/exec', {
                 method: 'POST',
-                body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
-                redirect: 'follow'
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: playerName,
+                    answers: Object.values(selected).map(arr => arr.join('|')).join(';'),
+                    correctAnswers: correctSelected.join(', '),
+                    score: score,
+                    round: '5',
+                    details: details,
+                    bets: JSON.stringify(bets)
+                })
             })
-            .then(response => {
-                if (response.ok) {
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
                     window.location.href = "final.html";
                 } else {
-                    throw new Error('Ошибка сети');
+                    throw new Error(data.message || 'Ошибка сервера');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
+                alert("Ошибка при отправке: " + error.message);
                 document.getElementById("submitBtn").disabled = false;
                 document.getElementById("loading").style.display = "none";
             });
