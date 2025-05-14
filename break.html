@@ -1,46 +1,173 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
     <title>Перерыв</title>
     <style>
-        body { 
-            font-family: Arial; 
-            text-align: center; 
-            padding: 50px;
-            background-color: #f0f8ff;
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-        h1 { color: #2e7d32; }
-        button {
-            padding: 12px 25px;
-            font-size: 16px;
-            background-color: #4CAF50;
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            animation: pulse 2s infinite;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        p {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .emoji {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+        
+        .next-btn {
+            background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 30px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-top: 20px;
         }
+        
+        .next-btn:hover {
+            background: linear-gradient(90deg, #43A047 0%, #7CB342 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .next-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+        }
+        
         .error {
             color: #d32f2f;
             margin-top: 20px;
             display: none;
+            font-size: 16px;
+        }
+        
+        @keyframes pulse {
+            0% {transform: scale(1);}
+            50% {transform: scale(1.02);}
+            100% {transform: scale(1);}
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-15px);}
+            60% {transform: translateY(-7px);}
+        }
+        
+        .music-note {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0;
+            animation: float 6s linear infinite;
+        }
+        
+        @keyframes float {
+            to {
+                top: -100px;
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Перерыв :)</h1>
-    <p>Спасибо за участие! Результаты будут объявлены позже.</p>
-    <button onclick="startRound3()">Перейти к туру 3</button>
-    <p id="errorMsg" class="error">Ошибка системы. Пожалуйста, сообщите организаторам.</p>
+    <div class="container">
+        <div class="emoji">🎵</div>
+        <h1>Перерыв</h1>
+        <p>Спасибо за участие! Результаты будут объявлены позже.</p>
+        
+        <button class="next-btn" onclick="startRound3()">
+            Перейти к туру 3
+        </button>
+        
+        <p id="errorMsg" class="error">
+            Ошибка системы. Пожалуйста, сообщите организаторам.
+        </p>
+    </div>
 
     <script>
+        // Создаем музыкальные нотки
+        function createMusicNotes() {
+            const notes = ['♪', '♫', '♩', '♬'];
+            const colors = ['#4CAF50', '#8BC34A', '#CDDC39', '#689F38'];
+            
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const note = document.createElement('div');
+                    note.className = 'music-note';
+                    note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                    note.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    note.style.left = Math.random() * 100 + 'vw';
+                    note.style.top = '100vh';
+                    note.style.animationDuration = (4 + Math.random() * 6) + 's';
+                    note.style.animationDelay = Math.random() * 2 + 's';
+                    document.body.appendChild(note);
+                    
+                    setTimeout(() => {
+                        note.remove();
+                    }, 10000);
+                }, i * 400);
+            }
+        }
+        
         function startRound3() {
-            // Проверяем имя в двух местах на случай проблем с localStorage
             const savedName = localStorage.getItem('playerName') || 
                              sessionStorage.getItem('playerNameBackup');
             
             if (savedName && savedName.trim().length > 0) {
-                // Дублируем в sessionStorage для надежности
                 sessionStorage.setItem('playerNameBackup', savedName);
                 window.location.href = "round3.html";
             } else {
@@ -51,12 +178,13 @@
             }
         }
         
-        // Проверяем при загрузке страницы
         window.onload = function() {
             const savedName = localStorage.getItem('playerName');
             if (savedName) {
                 sessionStorage.setItem('playerNameBackup', savedName);
             }
+            createMusicNotes();
+            setInterval(createMusicNotes, 8000);
         };
     </script>
 </body>
