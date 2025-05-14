@@ -249,8 +249,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert(`Ответы отправлены! Ваш результат: ${total} баллов (${bonus} бонусных). Спасибо за участие!`);
-                    // Можно перенаправить на страницу с результатами или очистить localStorage
+                    window.location.href = "break.html"; // Перенаправление
                     localStorage.removeItem('playerName');
                 } else {
                     throw new Error('Ошибка сети');
