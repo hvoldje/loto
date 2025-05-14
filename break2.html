@@ -18,6 +18,36 @@
     </style>
 </head>
 <body>
-    <div class="message">Перерыв перед блицем :)</div>
+    <h1>Перерыв перед БЛИЦЕМ:)</h1>
+    <p>Спасибо за участие! Сейчас будут объявлены промежуточные результаты.</p>
+    <button onclick="startRound5()">Перейти к БЛИЦУ</button>
+    <p id="errorMsg" class="error">Ошибка системы. Пожалуйста, сообщите организаторам.</p>
+
+    <script>
+        function startRound5() {
+            // Проверяем имя в двух местах на случай проблем с localStorage
+            const savedName = localStorage.getItem('playerName') || 
+                             sessionStorage.getItem('playerNameBackup');
+            
+            if (savedName && savedName.trim().length > 0) {
+                // Дублируем в sessionStorage для надежности
+                sessionStorage.setItem('playerNameBackup', savedName);
+                window.location.href = "round5.html";
+            } else {
+                document.getElementById("errorMsg").style.display = "block";
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 3000);
+            }
+        }
+        
+        // Проверяем при загрузке страницы
+        window.onload = function() {
+            const savedName = localStorage.getItem('playerName');
+            if (savedName) {
+                sessionStorage.setItem('playerNameBackup', savedName);
+            }
+        };
+    </script>
 </body>
 </html>
