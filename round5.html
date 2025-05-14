@@ -321,15 +321,50 @@
         }
 
         function submitForm() {
-            // Проверяем, что во всех блоках ровно 4 ответа (если есть ставки)
-            let isValid = true;
-            for (let blockNum = 1; blockNum <= 5; blockNum++) {
-                if (bets[blockNum] && selected[blockNum].length !== 4) {
-                    alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
-                    isValid = false;
-                    break;
-                }
-            }
+  // Проверка ставок
+  for (let blockNum = 1; blockNum <= 5; blockNum++) {
+    if (bets[blockNum] && selected[blockNum].length !== 4) {
+      alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
+      return;
+    }
+  }
+
+  // Подготовка данных
+  const { score, correctSelected, details } = calculateScore();
+  const formData = {
+    name: localStorage.getItem('playerName'),
+    answers: Object.values(selected).map(arr => arr.join('|')).join(';'),
+    correctAnswers: correctSelected.join(', '),
+    score: score,
+    round: '5',
+    details: details,
+    bets: JSON.stringify(bets)
+  };
+
+  // Отправка
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("loading").style.display = "block";
+
+  fetch('https://script.google.com/macros/s/ВАШ_ID_СКРИПТА/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      window.location.href = "final.html";
+    } else {
+      throw new Error(data.message || 'Ошибка сервера');
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка:', error);
+    alert("Ошибка при отправке: " + error.message);
+    document.getElementById("submitBtn").disabled = false;
+    document.getElementById("loading").style.display = "none";
+  });
+}
             
             if (!isValid) return;
 
