@@ -78,12 +78,6 @@
             margin-bottom: 20px;
             color: #555;
         }
-        .counter {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #2e7d32;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -91,7 +85,6 @@
         <h1>Музыкальное Лото - Тур 4</h1>
         <div class="player-name">Игрок: <span id="displayName"></span></div>
         <p class="instructions">Выберите до 10 исполнителей, чьи треки звучали в этом туре.</p>
-        <div class="counter">Выбрано: <span id="selectedCount">0</span>/10</div>
         
         <div class="grid">
             <div class="cell" onclick="toggleSelect(this)">МакSим</div>
@@ -177,11 +170,8 @@
                     el.classList.add("selected");
                 } else {
                     alert("Можно выбрать не более 10 исполнителей.");
-                    return;
                 }
             }
-            // Обновляем счетчик
-            document.getElementById("selectedCount").textContent = selected.length;
         }
 
         function calculateScore() {
@@ -235,4 +225,4 @@
         }
     </script>
 </body>
-</html>   
+</html>
