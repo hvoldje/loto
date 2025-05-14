@@ -56,11 +56,6 @@
             color: #333;
             font-weight: bold;
         }
-        .counter {
-            font-size: 16px;
-            color: #2e7d32;
-            margin-bottom: 15px;
-        }
         #loading {
             display: none;
             margin-top: 20px;
@@ -70,9 +65,8 @@
 <body>
     <h1>Музыкальное Лото - Тур 3: Музыкальный алфавит</h1>
     <div class="player-name">Игрок: <span id="displayName"></span></div>
-    <div class="counter">Выбрано: <span id="selectionCounter">0</span>/10</div>
     
-    <p>Выберите 10 исполнителей, которые соответствуют музыкальному алфавиту.</p>
+    <p>Выберите до 10 исполнителей, которые соответствуют музыкальному алфавиту.</p>
     
     <div class="grid">
         <div class="cell" onclick="toggleSelect(this)">Emre Altuğ</div>
@@ -111,95 +105,69 @@
     <div id="loading">Отправка данных...</div>
     
     <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbyFaAMO7tyBT-YhIsO-Rs5gvXC3phoFCFZ9Jh5AKssmg84V2GggP4C9l6VojXNwehcL/exec" style="display:none;">
-    <input type="hidden" name="name" id="nameInput">
-    <input type="hidden" name="answers" id="answersInput">
-    <input type="hidden" name="round" value="3">
-    <input type="hidden" name="score" id="scoreInput">
-    <input type="hidden" name="correct" id="correctInput">
-</form>
+        <input type="hidden" name="name" id="nameInput">
+        <input type="hidden" name="answers" id="answersInput">
+        <input type="hidden" name="round" value="3">
+        <input type="hidden" name="score" id="scoreInput">
+        <input type="hidden" name="correct" id="correctInput">
+    </form>
 
     <script>
+        // Проверка имени игрока
         const savedName = localStorage.getItem('playerName') || 
                          sessionStorage.getItem('playerNameBackup');
 
         if (!savedName || savedName.trim().length === 0) {
-            alert("Системная ошибка: данные сессии потеряны. Пожалуйста, начните с первого тура.");
+            alert("Пожалуйста, сначала пройдите первый тур.");
             window.location.href = "index.html";
         } else {
-            localStorage.setItem('playerName', savedName);
-            sessionStorage.setItem('playerNameBackup', savedName);
             document.getElementById("displayName").textContent = savedName;
             document.getElementById("nameInput").value = savedName;
         }
+
         const correctAnswers = [
-            "Alice Merton",
-            "Високосный год",
-            "Emre Altuğ",
-            "Зомб",
-            "Ke$ha",
-            "Пара Нормальных",
-            "Rita Ora",
-            "Сергей Крылов",
-            "twenty one pilots",
-            "Fly Project"
+            "Black Eyed Peas",
+            "Порнофильмы",
+            "Lenny Kravitz",
+            "МакSим",
+            "Red Hot Chili Peppers",
+            "Валерий Меладзе",
+            "Linkin Park",
+            "Ани Лорак",
+            "James Blunt",
+            "Quest Pistols"
         ];
         
         let selected = [];
-        const maxSelections = 10;
-
-        // Проверяем сохраненное имя при загрузке
-        window.onload = function() {
-            const savedName = localStorage.getItem('playerName');
-            if (savedName) {
-                document.getElementById("displayName").textContent = savedName;
-                document.getElementById("nameInput").value = savedName;
-            } else {
-                alert("Пожалуйста, сначала пройдите первый тур.");
-                window.location.href = "index.html";
-            }
-        };
+        const MAX_SELECTIONS = 10;
 
         function toggleSelect(el) {
             const name = el.textContent.trim();
             const index = selected.indexOf(name);
 
             if (index > -1) {
+                // Отменяем выбор
                 selected.splice(index, 1);
                 el.classList.remove("selected");
             } else {
-                if (selected.length < maxSelections) {
-                    selected.push(name);
-                    el.classList.add("selected");
-                } else {
-                    alert("Можно выбрать не более 10 исполнителей.");
+                // Проверяем ограничение
+                if (selected.length >= MAX_SELECTIONS) {
+                    alert(`Можно выбрать не более ${MAX_SELECTIONS} исполнителей.`);
                     return;
                 }
+                // Выбираем
+                selected.push(name);
+                el.classList.add("selected");
             }
-            
-            // Обновляем счетчик
-            document.getElementById("selectionCounter").textContent = selected.length;
-        }
-
-        function calculateScore() {
-            let score = 0;
-            for (const answer of selected) {
-                if (correctAnswers.includes(answer)) {
-                    score++;
-                }
-            }
-            return score;
         }
 
         function submitForm() {
-            if (selected.length !== 10) {
-                alert("Пожалуйста, выберите ровно 10 исполнителей.");
-                return;
-            }
-
-            const score = calculateScore();
-            const answers = selected.join(", ");
+            const correctSelected = selected.filter(answer => 
+                correctAnswers.includes(answer)).join(", ");
+            const score = correctSelected.split(", ").filter(Boolean).length;
             
-            document.getElementById("answersInput").value = answers;
+            document.getElementById("answersInput").value = selected.join(", ");
+            document.getElementById("correctInput").value = correctSelected;
             document.getElementById("scoreInput").value = score;
 
             document.getElementById("submitBtn").disabled = true;
@@ -212,10 +180,7 @@
             })
             .then(response => {
                 if (response.ok) {
-                    alert(`Ответы отправлены! Вы набрали ${score} баллов из 10 возможных. Спасибо за участие!`);
-                    localStorage.removeItem('playerName');
-                    // Можно перенаправить на страницу благодарности
-                    window.location.href = "thanks.html";
+                    window.location.href = "round4.html";
                 } else {
                     throw new Error('Ошибка сети');
                 }
