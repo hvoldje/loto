@@ -118,6 +118,18 @@
     </form>
 
     <script>
+        const savedName = localStorage.getItem('playerName') || 
+                         sessionStorage.getItem('playerNameBackup');
+
+        if (!savedName || savedName.trim().length === 0) {
+            alert("Системная ошибка: данные сессии потеряны. Пожалуйста, начните с первого тура.");
+            window.location.href = "index.html";
+        } else {
+            localStorage.setItem('playerName', savedName);
+            sessionStorage.setItem('playerNameBackup', savedName);
+            document.getElementById("displayName").textContent = savedName;
+            document.getElementById("nameInput").value = savedName;
+        }
         const correctAnswers = [
             "Alice Merton",
             "Високосный год",
