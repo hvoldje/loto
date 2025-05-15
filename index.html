@@ -68,6 +68,14 @@
         </div>
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec" style="display:none;">
+            <input type="hidden" name="name" id="nameInput">
+            <input type="hidden" name="answers" id="answersInput">
+            <input type="hidden" name="correctAnswers" id="correctAnswersInput">
+            <input type="hidden" name="score" id="scoreInput">
+            <input type="hidden" name="round" value="1">
+            <input type="hidden" name="timestamp" id="timestampInput">
+        </form>
     </div>
 
     <script>
@@ -130,41 +138,38 @@
             const name = document.getElementById("playerName").value.trim();
             const {score, correctSelected} = calculateScore();
             
-            // Сохраняем результаты в localStorage
-            saveResults(name, score, correctSelected);
-            
-            // Сохраняем имя для следующих туров
-            localStorage.setItem('playerName', name);
-            
-            // Перенаправляем на второй тур
+            document.getElementById("nameInput").value = name;
+            document.getElementById("answersInput").value = selected.join(", ");
+            document.getElementById("correctAnswersInput").value = correctSelected.join(", ");
+            document.getElementById("scoreInput").value = score;
+            document.getElementById("timestampInput").value = new Date().toISOString();
+
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
-            
-            setTimeout(() => {
-                window.location.href = "round2.html";
-            }, 1000);
-        }
 
-        function saveResults(playerName, score, correctAnswers) {
-            const storageKey = 'musicLotoResults';
+            // Сохраняем имя для второго тура
+            localStorage.setItem('playerName', name);
             
-            // Получаем текущие данные
-            const savedData = localStorage.getItem(storageKey);
-            let allResults = savedData ? JSON.parse(savedData) : {};
-            
-            // Добавляем новые результаты
-            if (!allResults[playerName]) {
-                allResults[playerName] = {};
-            }
-            
-            allResults[playerName]['1'] = {
-                score: score,
-                correctAnswers: correctAnswers.join(", "),
-                details: `Выбрано ${selected.length} из ${maxSelections}, правильных: ${score}`
-            };
-            
-            // Сохраняем обновленные данные
-            localStorage.setItem(storageKey, JSON.stringify(allResults));
+            // Отправляем данные через Fetch API
+            fetch(document.getElementById("hiddenForm").action, {
+                method: 'POST',
+                body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
+                redirect: 'follow'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Перенаправляем на второй тур
+                    window.location.href = "round2.html";
+                } else {
+                    throw new Error('Ошибка сети');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
+                document.getElementById("submitBtn").disabled = false;
+                document.getElementById("loading").style.display = "none";
+            });
         }
     </script>
 </body>
