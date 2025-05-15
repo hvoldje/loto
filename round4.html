@@ -127,7 +127,7 @@
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
         
-        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbweHpoplL7ButK8f2By-lqSUwrRiqz2SXqnQ0L0gG5wrAFgw8rw0TSkPGvAcVKwllS8/exec" style="display:none;">
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
             <input type="hidden" name="name" id="nameInput">
             <input type="hidden" name="answers" id="answersInput">
             <input type="hidden" name="correctAnswers" id="correctAnswersInput">
@@ -145,7 +145,6 @@
             "Ани Лорак", "James Blunt", "Quest Pistols"
         ];
 
-        // Проверяем сохраненное имя при загрузке
         window.onload = function() {
             const savedName = localStorage.getItem('playerName');
             if (savedName) {
@@ -197,6 +196,24 @@
             const name = document.getElementById("nameInput").value;
             const {score, correctSelected} = calculateScore();
             
+            // Сохранение в localStorage
+            const storageKey = 'musicLotoResults';
+            const savedData = localStorage.getItem(storageKey);
+            let allResults = savedData ? JSON.parse(savedData) : {};
+            
+            if (!allResults[name]) {
+                allResults[name] = {};
+            }
+            
+            allResults[name][4] = {
+                score: score,
+                correctAnswers: correctSelected.join(", "),
+                details: `Выбрано ${selected.length} из 10 возможных`
+            };
+            
+            localStorage.setItem(storageKey, JSON.stringify(allResults));
+
+            // Отправка на сервер
             document.getElementById("answersInput").value = selected.join(", ");
             document.getElementById("correctAnswersInput").value = correctSelected.join(", ");
             document.getElementById("scoreInput").value = score;
