@@ -132,7 +132,7 @@
         
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
-        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbweHpoplL7ButK8f2By-lqSUwrRiqz2SXqnQ0L0gG5wrAFgw8rw0TSkPGvAcVKwllS8/exec" style="display:none;">
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
             <input type="hidden" name="name" id="nameInput">
             <input type="hidden" name="answers" id="answersInput">
             <input type="hidden" name="round" value="2">
@@ -196,7 +196,6 @@
                 const correct = correctAnswers[blockNum];
                 let correctCount = 0;
                 
-                // Считаем правильные ответы
                 for (const answer of blockAnswers) {
                     if (correct.includes(answer)) {
                         correctCount++;
@@ -204,19 +203,14 @@
                     }
                 }
                 
-                // Добавляем баллы за правильные ответы
                 score += correctCount;
                 
-                // Проверяем на бонус за полный блок
                 if (correctCount === 3 && blockAnswers.length === 3) {
                     bonus++;
                 }
             }
             
-            // Добавляем бонусные баллы
             score += bonus;
-            
-            // Гарантируем, что баллы не будут отрицательными
             score = Math.max(0, score);
             
             return {total: score, bonus: bonus, correctSelected};
@@ -231,11 +225,28 @@
             const name = document.getElementById("playerName").value.trim();
             const {total, bonus, correctSelected} = calculateScore();
             
+            // Сохранение в localStorage
+            const storageKey = 'musicLotoResults';
+            const savedData = localStorage.getItem(storageKey);
+            let allResults = savedData ? JSON.parse(savedData) : {};
+            
+            if (!allResults[name]) {
+                allResults[name] = {};
+            }
+            
+            allResults[name][2] = {
+                score: total,
+                correctAnswers: correctSelected.join(", "),
+                details: `Бонус за полные блоки: ${bonus}`
+            };
+            
+            localStorage.setItem(storageKey, JSON.stringify(allResults));
+
+            // Отправка на сервер
             document.getElementById("nameInput").value = name;
             document.getElementById("answersInput").value = selected.join(", ");
             document.getElementById("scoreInput").value = total;
 
-            // Добавляем скрытые поля для правильных ответов
             const correctInput = document.createElement('input');
             correctInput.type = 'hidden';
             correctInput.name = 'correctAnswers';
