@@ -104,7 +104,7 @@
     <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
     <div id="loading">Отправка данных...</div>
     
-    <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
+    <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbxx_EvapF0_h4FlTiFFgJR13nz3zDJDqCH4k5JSgL-yyVP0iupBgcCtXgVHqo5WXWFl/exec" style="display:none;">
         <input type="hidden" name="name" id="nameInput">
         <input type="hidden" name="answers" id="answersInput">
         <input type="hidden" name="round" value="3">
@@ -146,13 +146,16 @@
             const index = selected.indexOf(name);
 
             if (index > -1) {
+                // Отменяем выбор
                 selected.splice(index, 1);
                 el.classList.remove("selected");
             } else {
+                // Проверяем ограничение
                 if (selected.length >= MAX_SELECTIONS) {
                     alert(`Можно выбрать не более ${MAX_SELECTIONS} исполнителей.`);
                     return;
                 }
+                // Выбираем
                 selected.push(name);
                 el.classList.add("selected");
             }
@@ -163,25 +166,6 @@
                 correctAnswers.includes(answer)).join(", ");
             const score = correctSelected.split(", ").filter(Boolean).length;
             
-            // Сохранение в localStorage
-            const playerName = document.getElementById("nameInput").value;
-            const storageKey = 'musicLotoResults';
-            const savedData = localStorage.getItem(storageKey);
-            let allResults = savedData ? JSON.parse(savedData) : {};
-            
-            if (!allResults[playerName]) {
-                allResults[playerName] = {};
-            }
-            
-            allResults[playerName][3] = {
-                score: score,
-                correctAnswers: correctSelected,
-                details: `Выбрано ${selected.length} из 10 возможных`
-            };
-            
-            localStorage.setItem(storageKey, JSON.stringify(allResults));
-
-            // Отправка на сервер
             document.getElementById("answersInput").value = selected.join(", ");
             document.getElementById("correctInput").value = correctSelected;
             document.getElementById("scoreInput").value = score;
