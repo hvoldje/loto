@@ -211,7 +211,7 @@
     </div>
 
     <!-- Скрытая форма для отправки данных -->
-    <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
+    <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbzw8ebo_J8RYOPdvUHEv2S_-HsYdyKc9ElspBy_VwjG1UtsWaIMZb_cPHrkmgmzCI8h/exec" style="display:none;">
         <input type="hidden" name="name" id="nameInput">
         <input type="hidden" name="answers" id="answersInput">
         <input type="hidden" name="correctAnswers" id="correctAnswersInput">
@@ -239,7 +239,6 @@
             const savedName = localStorage.getItem('playerName');
             if (savedName) {
                 document.getElementById("displayName").textContent = savedName;
-                document.getElementById("nameInput").value = savedName;
             } else {
                 alert("Пожалуйста, сначала пройдите предыдущие туры.");
                 window.location.href = "index.html";
@@ -325,24 +324,6 @@
             const {score, correctSelected, details} = calculateScore();
             const playerName = localStorage.getItem('playerName');
             
-            // Сохранение в localStorage
-            const storageKey = 'musicLotoResults';
-            const savedData = localStorage.getItem(storageKey);
-            let allResults = savedData ? JSON.parse(savedData) : {};
-            
-            if (!allResults[playerName]) {
-                allResults[playerName] = {};
-            }
-            
-            allResults[playerName][5] = {
-                score: score,
-                correctAnswers: correctSelected.join(", "),
-                details: details,
-                bets: JSON.stringify(bets)
-            };
-            
-            localStorage.setItem(storageKey, JSON.stringify(allResults));
-
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
 
