@@ -312,32 +312,49 @@
         }
 
         // Отправка данных через форму
-        function submitForm() {
-            // Проверка ставок
-            for (let blockNum = 1; blockNum <= 5; blockNum++) {
-                if (bets[blockNum] && selected[blockNum].length !== 4) {
-                    alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
-                    return;
-                }
+    function submitForm() {
+        // Проверка ставок
+        for (let blockNum = 1; blockNum <= 5; blockNum++) {
+            if (bets[blockNum] && selected[blockNum].length !== 4) {
+                alert(`В блоке ${blockNum} с ставкой должно быть ровно 4 ответа!`);
+                return;
             }
-
-            const {score, correctSelected, details} = calculateScore();
-            const playerName = localStorage.getItem('playerName');
-            
-            document.getElementById("submitBtn").disabled = true;
-            document.getElementById("loading").style.display = "block";
-
-            // Заполняем скрытую форму
-            document.getElementById("nameInput").value = playerName;
-            document.getElementById("answersInput").value = Object.values(selected).map(arr => arr.join('|')).join(';');
-            document.getElementById("correctAnswersInput").value = correctSelected.join(', ');
-            document.getElementById("scoreInput").value = score;
-            document.getElementById("detailsInput").value = details;
-            document.getElementById("betsInput").value = JSON.stringify(bets);
-
-            // Отправляем форму
-            document.getElementById("hiddenForm").submit();
         }
-    </script>
+
+        const {score, correctSelected, details} = calculateScore();
+        const playerName = localStorage.getItem('playerName');
+        
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("loading").style.display = "block";
+
+        // Заполняем скрытую форму
+        document.getElementById("nameInput").value = playerName;
+        document.getElementById("answersInput").value = Object.values(selected).map(arr => arr.join('|')).join(';');
+        document.getElementById("correctAnswersInput").value = correctSelected.join(', ');
+        document.getElementById("scoreInput").value = score;
+        document.getElementById("detailsInput").value = details;
+        document.getElementById("betsInput").value = JSON.stringify(bets);
+
+        // Отправляем форму с перенаправлением на final.html
+        fetch(document.getElementById("hiddenForm").action, {
+            method: 'POST',
+            body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
+            redirect: 'follow'
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = "final.html";
+            } else {
+                throw new Error('Ошибка сети');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
+            document.getElementById("submitBtn").disabled = false;
+            document.getElementById("loading").style.display = "none";
+        });
+    }
+</script>
 </body>
 </html>
