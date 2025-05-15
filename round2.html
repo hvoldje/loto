@@ -132,11 +132,13 @@
         
         <button id="submitBtn" onclick="submitForm()">Отправить ответы</button>
         <div id="loading">Отправка данных...</div>
-        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycMVCKJdv-y775Fg-S1jm_95oR5otSQoL4_yTD0UIBpMuky-R1fxoqORAGePNWqBR-/exec" style="display:none;">
+        <form id="hiddenForm" method="POST" action="https://script.google.com/macros/s/AKfycbycLnmnB1I-6nhTgnMCeVy3wyqr0g4yH9cTXsCr5_OzInHSD1I7_OPzaALCT4ApL8iE/exec" style="display:none;">
             <input type="hidden" name="name" id="nameInput">
             <input type="hidden" name="answers" id="answersInput">
             <input type="hidden" name="round" value="2">
             <input type="hidden" name="score" id="scoreInput">
+            <input type="hidden" name="timestamp" id="timestampInput">
+            <input type="hidden" name="correctAnswers" id="correctAnswersInput">
         </form>
     </div>
 
@@ -225,55 +227,17 @@
             const name = document.getElementById("playerName").value.trim();
             const {total, bonus, correctSelected} = calculateScore();
             
-            // Сохранение в localStorage
-            const storageKey = 'musicLotoResults';
-            const savedData = localStorage.getItem(storageKey);
-            let allResults = savedData ? JSON.parse(savedData) : {};
-            
-            if (!allResults[name]) {
-                allResults[name] = {};
-            }
-            
-            allResults[name][2] = {
-                score: total,
-                correctAnswers: correctSelected.join(", "),
-                details: `Бонус за полные блоки: ${bonus}`
-            };
-            
-            localStorage.setItem(storageKey, JSON.stringify(allResults));
-
-            // Отправка на сервер
             document.getElementById("nameInput").value = name;
             document.getElementById("answersInput").value = selected.join(", ");
             document.getElementById("scoreInput").value = total;
-
-            const correctInput = document.createElement('input');
-            correctInput.type = 'hidden';
-            correctInput.name = 'correctAnswers';
-            correctInput.value = correctSelected.join(", ");
-            document.getElementById("hiddenForm").appendChild(correctInput);
+            document.getElementById("correctAnswersInput").value = correctSelected.join(", ");
+            document.getElementById("timestampInput").value = new Date().toISOString();
 
             document.getElementById("submitBtn").disabled = true;
             document.getElementById("loading").style.display = "block";
 
-            fetch(document.getElementById("hiddenForm").action, {
-                method: 'POST',
-                body: new URLSearchParams(new FormData(document.getElementById("hiddenForm"))),
-                redirect: 'follow'
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = "break.html";
-                } else {
-                    throw new Error('Ошибка сети');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert("Ошибка при отправке. Пожалуйста, попробуйте еще раз.");
-                document.getElementById("submitBtn").disabled = false;
-                document.getElementById("loading").style.display = "none";
-            });
+            // Отправка формы
+            document.getElementById("hiddenForm").submit();
         }
     </script>
 </body>
