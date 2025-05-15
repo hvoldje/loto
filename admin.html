@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админка - Музыкальное Лото</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .player-row {
+            cursor: pointer;
+        }
+        .player-details {
+            display: none;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .round-name {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .search-box {
+            padding: 8px;
+            width: 300px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты участников</h1>
+        
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="Поиск по имени...">
+            <button onclick="refreshData()">Обновить данные</button>
+            <button onclick="exportToCSV()">Экспорт в CSV</button>
+            <button onclick="clearAllData()">Очистить все данные</button>
+        </div>
+        
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Тур 1</th>
+                    <th>Тур 2</th>
+                    <th>Тур 3</th>
+                    <th>Тур 4</th>
+                    <th>Тур 5</th>
+                    <th>Итого</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Данные будут заполнены скриптом -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Хранилище данных
+        const storageKey = 'musicLotoResults';
+        let allResults = {};
+        
+        // Названия туров
+        const roundNames = {
+            1: 'Разминка',
+            2: 'Тур 2',
+            3: 'Алфавит',
+            4: 'Тур 4',
+            5: 'Блиц'
+        };
+        
+        // Загрузка данных при открытии страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            displayResults();
+            
+            // Поиск при вводе текста
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterResults(this.value.toLowerCase());
+            });
+            
+            // Обновление данных каждые 5 секунд
+            setInterval(refreshData, 5000);
+        });
+        
+        // Загрузка данных из localStorage
+        function loadData() {
+            const savedData = localStorage.getItem(storageKey);
+            if (savedData) {
+                allResults = JSON.parse(savedData);
+            }
+        }
+        
+        // Сохранение данных в localStorage
+        function saveData() {
+            localStorage.setItem(storageKey, JSON.stringify(allResults));
+        }
+        
+        // Отображение результатов в таблице
+        function displayResults() {
+            const tableBody = document.querySelector('#resultsTable tbody');
+            tableBody.innerHTML = '';
+            
+            // Сортируем имена по алфавиту
+            const sortedNames = Object.keys(allResults).sort();
+            
+            sortedNames.forEach(name => {
+                const playerResults = allResults[name];
+                const totalScore = calculateTotalScore(playerResults);
+                
+                const row = document.createElement('tr');
+                row.className = 'player-row';
+                row.innerHTML = `
+                    <td>${name}</td>
+                    <td>${playerResults[1]?.score || '0'}</td>
+                    <td>${playerResults[2]?.score || '0'}</td>
+                    <td>${playerResults[3]?.score || '0'}</td>
+                    <td>${playerResults[4]?.score || '0'}</td>
+                    <td>${playerResults[5]?.score || '0'}</td>
+                    <td><strong>${totalScore}</strong></td>
+                `;
+                
+                // Создаем строку с деталями
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'player-details';
+                detailsRow.innerHTML = `
+                    <td colspan="7">
+                        ${generatePlayerDetails(playerResults)}
+                    </td>
+                `;
+                
+                // Обработчик клика для показа деталей
+                row.addEventListener('click', function() {
+                    detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+                });
+                
+                tableBody.appendChild(row);
+                tableBody.appendChild(detailsRow);
+            });
+        }
+        
+        // Фильтрация результатов по имени
+        function filterResults(searchTerm) {
+            const rows = document.querySelectorAll('#resultsTable tbody tr');
+            rows.forEach(row => {
+                if (row.classList.contains('player-row')) {
+                    const nameCell = row.cells[0];
+                    const name = nameCell.textContent.toLowerCase();
+                    const shouldShow = name.includes(searchTerm);
+                    row.style.display = shouldShow ? '' : 'none';
+                    
+                    // Скрываем/показываем соответствующую строку с деталями
+                    const detailsRow = row.nextElementSibling;
+                    if (detailsRow && detailsRow.classList.contains('player-details')) {
+                        detailsRow.style.display = shouldShow ? 'none' : 'none';
+                    }
+                }
+            });
+        }
+        
+        // Генерация деталей для игрока
+        function generatePlayerDetails(playerResults) {
+            let details = '';
+            
+            for (let round = 1; round <= 5; round++) {
+                if (playerResults[round]) {
+                    const roundData = playerResults[round];
+                    details += `
+                        <div class="round-details">
+                            <span class="round-name">${roundNames[round]}:</span>
+                            ${roundData.score || 0} баллов<br>
+                            ${roundData.correctAnswers ? `Правильные ответы: ${roundData.correctAnswers}<br>` : ''}
+                            ${roundData.details ? `Детали: ${roundData.details.replace(/;/g, '<br>')}` : ''}
+                        </div>
+                        <hr>
+                    `;
+                }
+            }
+            
+            return details;
+        }
+        
+        // Расчет общего количества баллов
+        function calculateTotalScore(playerResults) {
+            let total = 0;
+            for (let round = 1; round <= 5; round++) {
+                if (playerResults[round] && playerResults[round].score) {
+                    total += parseInt(playerResults[round].score) || 0;
+                }
+            }
+            return total;
+        }
+        
+        // Обновление данных
+        function refreshData() {
+            loadData();
+            displayResults();
+        }
+        
+        // Экспорт в CSV
+        function exportToCSV() {
+            let csv = 'Имя;Тур 1;Тур 2;Тур 3;Тур 4;Тур 5;Итого\n';
+            
+            const sortedNames = Object.keys(allResults).sort();
+            sortedNames.forEach(name => {
+                const playerResults = allResults[name];
+                const totalScore = calculateTotalScore(playerResults);
+                
+                csv += `"${name}";`;
+                for (let round = 1; round <= 5; round++) {
+                    csv += `${playerResults[round]?.score || '0'};`;
+                }
+                csv += `${totalScore}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `music_loto_results_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+        }
+        
+        // Очистка всех данных
+        function clearAllData() {
+            if (confirm('Вы уверены, что хотите удалить ВСЕ данные? Это действие нельзя отменить.')) {
+                localStorage.removeItem(storageKey);
+                allResults = {};
+                displayResults();
+            }
+        }
+    </script>
+</body>
+</html>
